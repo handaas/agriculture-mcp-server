@@ -1,43 +1,44 @@
 # 农业：农产品价格监控预警
 
-[该 MCP 服务围绕农产品价格监控预警，提供农产品价格行情、农业价格指数和日周月市场报告查询能力，为价格波动识别和市场趋势研判提供数据依据。](https://www.handaas.com/)
+[该MCP服务提供农产品价格行情、农业价格指数和日周月市场分析报告查询功能，为价格监控和预警研判提供数据。](https://www.handaas.com/)
 
-> 所属板块：市场贸易
 
 ## 主要功能
 
-- 农产品价格行情监控
-- 产地与市场价格比较
-- 农业价格指数跟踪
-- 农业市场分析与预警研判
-
-## 服务设计说明
-
-- 服务提供价格监控和预警研判所需的查询数据，不在后台持续运行，也不主动发送告警通知。
-- 服务提供 3 个只读 Tool，单次 Tool 调用只访问一个 Product ID。
-- 翻页结果统一收口为 `total` 与 `resultList`。
-- 成功响应自动兼容 Gateway业务 data和内部 `stat/data` 两种形态。
-- 请求超时可通过 `HANDAAS_REQUEST_TIMEOUT` 配置，默认30秒。
+- 🥬 农产品价格行情搜索
+- 📈 农产品高低价和涨跌监控
+- 📊 农业价格指数查询
+- 📰 日度、周度和月度市场报告
 
 ## 环境要求
 
 - Python 3.10+
-- 依赖：`mcp`、`python-dotenv`、`requests`
+- 依赖包：python-dotenv, requests, mcp
 
 ## 本地快速启动
 
+### 1. 克隆项目
 ```bash
+git clone https://github.com/handaas/agriculture-mcp-server
 cd agriculture-mcp-server
-python3 -m venv mcp_env
-source mcp_env/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-python server/mcp_server.py streamable-http
 ```
 
-服务默认地址：`http://127.0.0.1:8000/mcp`。支持 `stdio`、`sse` 和 `streamable-http`。
+### 2. 创建虚拟环境&安装依赖
 
-## 环境变量
+```bash
+python -m venv mcp_env && source mcp_env/bin/activate
+pip install -r requirements.txt
+```
+
+### 3. 环境配置
+
+复制环境变量模板并配置：
+
+```bash
+cp .env.example .env
+```
+
+编辑 `.env` 文件，配置以下环境变量：
 
 ```env
 INTEGRATOR_ID=your_integrator_id
@@ -46,9 +47,17 @@ SECRET_KEY=your_secret_key
 HANDAAS_REQUEST_TIMEOUT=30
 ```
 
-真实凭据只能保存在本地 `.env` 或部署密钥中。
+### 4. streamable-http启动服务
 
-## Cursor / Cherry Studio配置
+```bash
+python server/mcp_server.py streamable-http
+```
+
+服务将在 `http://localhost:8000` 启动，MCP 地址为 `http://127.0.0.1:8000/mcp`。
+
+#### 支持启动方式 stdio 或 sse 或 streamable-http
+
+### 5. Cursor / Cherry Studio MCP配置
 
 ```json
 {
@@ -61,98 +70,117 @@ HANDAAS_REQUEST_TIMEOUT=30
 }
 ```
 
-## 可用 Tool 与 Product ID
+## STDIO版安装部署
 
-| MCP Tool | 使用场景 | Product ID | 关键输入 |
-| --- | --- | --- | --- |
-| `agriculture_product_search` | 查询农产品最新行情与高低价 | `6a7c58fd71276c00fb93e980` | `productName`、分页 |
-| `agriculture_price_index` | 查询指定日期农业价格指数 | `6a7c626971276c00fb93eab7` | `publishTime` |
-| `agriculture_market_report` | 查询日周月农业市场分析报告 | `6a7c637bc90c69ced247c56c` | `reportType`、`size` |
+### 设置Cursor / Cherry Studio MCP配置
 
-## 推荐分析流程
+```json
+{
+  "mcpServers": {
+    "agriculture-mcp-server": {
+      "command": "uv",
+      "args": ["run", "mcp", "run", "{workdir}/server/mcp_server.py"],
+      "env": {
+        "PATH": "{workdir}/mcp_env/bin:$PATH",
+        "PYTHONPATH": "{workdir}/mcp_env",
+        "INTEGRATOR_ID": "your_integrator_id",
+        "SECRET_ID": "your_secret_id",
+        "SECRET_KEY": "your_secret_key"
+      }
+    }
+  }
+}
+```
 
-1. 使用 `agriculture_product_search` 查询目标农产品的当前均价、高低价、涨跌和产地市场差异。
-2. 使用 `agriculture_price_index` 查询同一日期的整体价格指数。
-3. 使用 `agriculture_market_report` 获取日度、周度或月度报告，解释波动原因并形成预警研判。
+## 使用官方Remote服务
 
-本服务提供监控预警所需数据，不在后台持续运行，也不主动发送告警。
+当前服务暂未开放官方 Remote 地址。请使用本地 `stdio`、`sse` 或 `streamable-http` 方式运行；官方 Remote 地址开放后将在本节补充配置。
 
-## Tool 详细说明
+### 注意：integrator_id、secret_id、secret_key及Remote token需要登录 https://www.handaas.com/ 进行注册开通平台获取
+
+
+## 可用工具
 
 ### 1. agriculture_product_search
+**功能**: 农产品价格行情搜索
 
-**何时使用**：查询某种农产品的最新价格、涨跌幅、高低价市场和产地差异，或分页浏览全部农产品。
+**参数**:
+- `productName` (可选): 农产品名称，支持模糊搜索
+- `pageIndex` (可选): 页码，从1开始
+- `pageSize` (可选): 每页条数，默认10，最大50
 
-**关键参数**：`productName` 支持模糊搜索；`pageIndex` 从 1 开始；`pageSize` 最大 50。
-
-**返回说明**：返回分类、产品名、行情日期、均价、高低价、市场和产地信息。所有价格必须结合返回的 `unit` 解读。
+**返回值**:
+- `total`: 农产品总数
+- `resultList`: 农产品行情列表
+  - `Classification`: 产品分类
+  - `productName`: 产品名称
+  - `date`: 行情日期
+  - `doD`: 涨跌幅
+  - `bulkAveragePrice`: 大宗均价
+  - `highPrice`: 最高价
+  - `lowPrice`: 最低价
+  - `unit`: 价格单位
+  - `originBulkAveragePriceList`: 产地均价列表
+  - `highPriceMarket` / `lowPriceMarket`: 高低价市场
+  - `highPriceOrigin` / `lowPriceOrigin`: 高低价产地
+  - `priceChange`: 价格变动
 
 ### 2. agriculture_price_index
+**功能**: 农业价格指数查询
 
-**何时使用**：查询某一天的农产品批发、菜篮子、粮油等整体价格指数。
+**参数**:
+- `publishTime` (必需): 发布日期，格式YYYY-MM-DD
 
-**关键参数**：`publishTime` 必填，格式为 `YYYY-MM-DD`。
-
-**返回说明**：返回指数名称、当前值、前日值和环比；缺失日期不插值，直接返回空结果。
+**返回值**:
+- `total`: 指数记录数量
+- `resultList`: 价格指数列表
+  - `publishTime`: 发布日期
+  - `currentIndexValue`: 当前指数值
+  - `previousIndexValue`: 前日指数值
+  - `indexName`: 指数名称
+  - `indexType`: 指数类型
+  - `chainRatio`: 环比变化
 
 ### 3. agriculture_market_report
+**功能**: 农业市场分析报告查询
 
-**何时使用**：需要用市场报告解释近期价格变化、供需情况或形成风险预警依据时使用。
+**参数**:
+- `reportType` (必需): 报告类型，可选day、week、month
+- `size` (可选): 返回报告数量，默认3，范围1至9
 
-**关键参数**：`reportType` 仅支持 `day`、`week`、`month`；`size` 范围为 1 至 9。
-
-**返回说明**：返回报告日期、标题、正文、类型和来源；`resultList` 最多包含 `size` 条记录。
-
-## 使用示例
-
-### 示例一：查询农产品行情
-
-> 查询白菜最近的均价、最高价、最低价和涨跌情况。
-
-```json
-{
-  "tool": "agriculture_product_search",
-  "arguments": {
-    "productName": "白菜",
-    "pageIndex": 1,
-    "pageSize": 10
-  }
-}
-```
-
-### 示例二：查询价格指数
-
-> 查询 2026 年 8 月 11 日的农业价格指数及环比变化。
-
-```json
-{
-  "tool": "agriculture_price_index",
-  "arguments": {
-    "publishTime": "2026-08-11"
-  }
-}
-```
-
-### 示例三：形成周度预警研判
-
-> 获取最近 3 份农业周报，结合白菜价格判断是否存在明显波动。
-
-```json
-{
-  "tool": "agriculture_market_report",
-  "arguments": {
-    "reportType": "week",
-    "size": 3
-  }
-}
-```
+**返回值**:
+- `total`: 上游报告总数
+- `resultList`: 最近报告列表，最多返回 `size` 条
+  - `publishTime`: 发布日期
+  - `reportTitle`: 报告标题
+  - `reportContent`: 报告内容
+  - `reportType`: 报告类型
+  - `reportSource`: 报告来源
 
 ## 使用注意事项
 
-1. 价格单位使用接口返回的 `unit`，不自行换算。
-2. 指数缺失日期不做插值。
-3. 报告数量 `size` 范围为 1 至 9。
-4. 预警结论应综合行情、指数和报告，不应只依据单一价格点。
+1. **价格单位**: 所有价格必须结合返回的 `unit` 解读，不自行换算。
+2. **指数日期**: 指数缺失日期不做插值，直接返回合法空结果。
+3. **报告类型**: `reportType` 只支持day、week、month。
+4. **报告数量**: `size` 范围为1至9。
+5. **预警边界**: 服务提供监控和研判数据，不在后台持续运行，也不主动发送告警。
+
+## 使用提问示例
+
+### agriculture_product_search (农产品价格行情搜索)
+1. 查询白菜最近的均价和涨跌情况
+2. 查看苹果的最高价和最低价市场
+3. 搜索名称中包含“猪肉”的农产品行情
+
+### agriculture_price_index (农业价格指数查询)
+1. 查询2026年8月11日的农业价格指数
+2. 查看指定日期菜篮子指数的环比变化
+3. 对比当天指数当前值和前日值
+
+### agriculture_market_report (农业市场分析报告查询)
+1. 获取最近3份农业周报
+2. 查询最近2份农业日报
+3. 获取最近6个月的农业月度市场报告
 
 ## 测试验证
 
@@ -161,4 +189,4 @@ python -m py_compile server/mcp_server.py
 python -m unittest discover -s tests -v
 ```
 
-单元测试使用 Mock 响应；真实验证通过本地 `.env` 调用 HandaaS Integrator Gateway。
+当前服务包含 7 个离线单元测试。真实接口验证需在本地 `.env` 配置有效凭据后执行，测试输出不得提交真实业务响应或凭据。
