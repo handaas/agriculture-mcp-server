@@ -139,7 +139,7 @@ def _unwrap_backend_data(result: Any) -> Any:
     return result.get("data")
 
 
-def _pagination_error(page_index: int, page_size: int, maximum: int = 50) -> dict[str, Any] | None:
+def _pagination_error(page_index: int, page_size: int, maximum: int = 10) -> dict[str, Any] | None:
     if page_index < 1:
         return {"error": "pageIndex 必须大于等于 1", "parameter": "pageIndex"}
     if page_size < 1 or page_size > maximum:
@@ -236,7 +236,7 @@ ReportType = Literal["day", "week", "month"]
     title="农产品价格行情监控",
     description=(
         "按农产品名称模糊搜索最新行情，用于比较均价、高低价、涨跌幅、产地和市场差异。"
-        "不传 productName 时分页浏览全部品类；pageIndex 从 1 开始，pageSize 最大 50，"
+        "不传 productName 时分页浏览全部品类；pageIndex 从 1 开始，pageSize 最大 10，"
         "价格必须结合结果中的 unit 解读。"
     ),
     annotations=READ_ONLY_TOOL,
@@ -295,7 +295,7 @@ def agriculture_wholesale_market_list(
     description=(
         "按农产品、产地和日期区间查询各批发市场每日最高价、最低价和大宗均价，"
         "适用于价格趋势、产地价差和市场行情分析。productId 建议来自 agriculture_product_search，"
-        "origin 使用省份全称，日期格式为 YYYY-MM-DD；pageSize 最大 50，价格单位为元/公斤。"
+        "origin 使用省份全称，日期格式为 YYYY-MM-DD；pageSize 最大 10，价格单位为元/公斤。"
     ),
     annotations=READ_ONLY_TOOL,
 )

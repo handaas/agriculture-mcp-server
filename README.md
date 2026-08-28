@@ -124,7 +124,7 @@ python server/mcp_server.py streamable-http
 **参数**:
 - `productName` (可选): 农产品名称，支持模糊搜索
 - `pageIndex` (可选): 页码，从1开始
-- `pageSize` (可选): 每页条数，默认10，最大50
+- `pageSize` (可选): 每页条数，默认10，最大10
 
 **返回值**:
 - `total`: 农产品总数
@@ -185,7 +185,7 @@ python server/mcp_server.py streamable-http
 - `startDate` (可选): 起始日期，格式YYYY-MM-DD
 - `endDate` (可选): 截止日期，格式YYYY-MM-DD
 - `pageIndex` (可选): 页码，从1开始，默认1
-- `pageSize` (可选): 每页条数，默认10，最大50
+- `pageSize` (可选): 每页条数，默认10，最大10
 
 **返回值**:
 - `total`: 每日价格记录总数
@@ -240,7 +240,7 @@ python server/mcp_server.py streamable-http
 ## 使用注意事项
 
 1. **农产品ID**: 批发市场和每日价格查询建议先调用 `agriculture_product_search` 获取 `productId`。
-2. **分页限制**: 批发市场明细一页最多10条，其他分页查询一页最多50条。
+2. **分页限制**: 所有分页查询一页最多10条。
 3. **价格单位**: 批发市场和每日价格明细统一为元/公斤；价格行情需结合返回的 `unit` 解读。
 4. **产地格式**: 每日价格明细的 `origin` 使用省份全称，例如广东省。
 5. **日期范围**: `startDate` 不能晚于 `endDate`，格式均为YYYY-MM-DD。

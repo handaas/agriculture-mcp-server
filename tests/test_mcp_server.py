@@ -76,7 +76,7 @@ class ContractTests(TestCase):
     def test_invalid_pagination_is_actionable(self) -> None:
         error = server._pagination_error(0, 10)
         self.assertEqual(error["parameter"], "pageIndex")
-        error = server._pagination_error(1, 51)
+        error = server._pagination_error(1, 11)
         self.assertEqual(error["parameter"], "pageSize")
 
     def test_empty_business_response_is_normalized(self) -> None:
@@ -121,7 +121,7 @@ class RoutingTests(TestCase):
                 origin="广东省",
                 startDate="2026-08-01",
                 endDate="2026-08-25",
-                pageSize=20,
+                pageSize=10,
             )
         call.assert_called_once_with(
             server.PRODUCT_IDS["daily_prices"],
@@ -131,7 +131,7 @@ class RoutingTests(TestCase):
                 "startDate": "2026-08-01",
                 "endDate": "2026-08-25",
                 "pageIndex": 1,
-                "pageSize": 20,
+                "pageSize": 10,
             },
         )
 
