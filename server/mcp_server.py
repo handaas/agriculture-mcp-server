@@ -17,7 +17,7 @@ from mcp.types import ToolAnnotations
 load_dotenv()
 
 mcp = FastMCP(
-    "农业：农产品价格监控预警",
+    "农产品价格监控预警",
     instructions=(
         "先搜索农产品取得 productId，再查询批发市场分布和每日价格明细；"
         "结合价格指数与日周月市场报告，支持价格监控、流通分析和预警研判。"
