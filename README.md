@@ -96,9 +96,20 @@ python server/mcp_server.py streamable-http
 
 ## 使用官方Remote服务
 
-当前服务暂未开放官方 Remote 地址。请使用本地 `stdio`、`sse` 或 `streamable-http` 方式运行；官方 Remote 地址开放后将在本节补充配置。
+### 1. 直接设置Cursor / Cherry Studio MCP配置
 
-### 注意：integrator_id、secret_id、secret_key及Remote token需要登录 https://www.handaas.com/ 进行注册开通平台获取
+```json
+{
+  "mcpServers": {
+    "agriculture-mcp-server":{
+      "type": "streamableHttp",
+      "url": "https://mcp.handaas.com/agriculture/agriculture_bigdata?token={token}"
+      }
+  }
+}
+```
+
+### 注意：integrator_id、secret_id、secret_key及token需要登录 https://www.handaas.com/ 进行注册开通平台获取
 
 
 ## 推荐调用流程

@@ -243,7 +243,7 @@ ReportType = Literal["day", "week", "month"]
 )
 def agriculture_product_search(productName: str | None = None, pageIndex: int = 1, pageSize: int = 10) -> dict[str, Any]:
     """分页返回农产品、分类、产地、市场和最新高低价。"""
-    if error := _pagination_error(pageIndex, pageSize):
+    if error := _pagination_error(pageIndex, pageSize, maximum=10):
         return error
     return _with_product_id_alias(
         _normalize_paged(
@@ -274,7 +274,7 @@ def agriculture_wholesale_market_list(
     pageSize: int = 10,
 ) -> dict[str, Any]:
     """分页查询农产品批发市场及其历史价格和市场规模。"""
-    if error := _pagination_error(pageIndex, pageSize, maximum=10):
+    if error := _pagination_error(pageIndex, pageSize):
         return error
     return _with_wholesale_market_aliases(
         _normalize_paged(
